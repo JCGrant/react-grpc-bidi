@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package proto;
+
+message StreamPlayerUpdatesRequest {}
+
+message PlayerUpdate {
+  int64 id    = 1;
+  string name = 2;
+  int64 x     = 3;
+  int64 y     = 4;
+}
+
+service GameService {
+ rpc StreamPlayerUpdates(StreamPlayerUpdatesRequest) returns (stream PlayerUpdate) {}
+}
