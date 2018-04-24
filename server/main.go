@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/JCGrant/react-grpc-bidi/server/game"
 	"github.com/JCGrant/react-grpc-bidi/server/protos"
@@ -12,8 +13,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 )
-
-var port = 8080
 
 type gameService struct{}
 
@@ -24,14 +23,18 @@ func newGameService() *gameService {
 func (s *gameService) StreamPlayerUpdates(req *protos.StreamPlayerUpdatesRequest, stream protos.GameService_StreamPlayerUpdatesServer) error {
 	for {
 		player := game.GenerateRandomPlayerUpdate()
+		log.Printf("%+v", player)
+		time.Sleep(time.Second / 10)
 		stream.Send(&player)
 	}
 }
 
 func main() {
+	port := 9090
+
 	grpcServer := grpc.NewServer()
-	service := newGameService()
-	protos.RegisterGameServiceServer(grpcServer, service)
+	gameService := newGameService()
+	protos.RegisterGameServiceServer(grpcServer, gameService)
 	grpclog.SetLogger(log.New(os.Stdout, "game server: ", log.LstdFlags))
 
 	websocketOriginFunc := grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
